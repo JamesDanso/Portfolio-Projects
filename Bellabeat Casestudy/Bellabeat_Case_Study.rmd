@@ -1,0 +1,264 @@
+---
+title: "Bellabeat Case Study"
+author: "James"
+date: "13/12/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Ask/Introduction
+
+Bellabeat is a high-tech manufacturer of health-focused smart products for women. Bellabeat’s app and multiple smart devices collect data on activity, sleep, stress, hydration levels, and reproductive health to empower women with an understanding of their own health and habits.
+
+Questions for the analysis:
+1. What are some trends in smart device usage?
+2. How could these trends apply to Bellabeat customers?
+3. How could these trends help influence Bellabeat’s marketing strategy?
+
+Stakeholders 
+
+
+# Prepare
+```{r}
+library(tidyverse)
+library(here)
+library(skimr)
+library(janitor)
+library(dplyr)
+library(readxl)
+```
+
+## Assign dataframes 
+
+First step is to assign the sample tracking data CSV files to a dataframe for easy manipulation later. 
+
+```{r}
+setwd("C:\\Users\\james\\Documents\\Google data analytics certificate\\Portfolio Project\\Fitbit Fitness Tracker data\\Fitabase Data 4.12.16-5.12.16")
+daily_activity <- read.csv("dailyActivity_merged.csv")
+sleep_day <- read.csv("sleepDay_merged.csv") 
+minute_METs <- read.csv("minuteMETsNarrow_merged.csv") 
+heart_rate <- read.csv("heartrate_seconds_merged.csv") 
+weightlog <- read.csv("weightLogInfo_merged.csv") 
+```
+
+# Process
+
+To begin the process phase we'll take a look at the columns and first 6 rows of the daily_activity dataframe using the head() function.
+```{r}
+head(daily_activity)
+```
+
+Identify all the column names in the daily_activity dataframe.
+
+```{r}
+colnames(daily_activity)
+glimpse (daily_activity)
+```
+
+Take a look at the sleep_day data.
+```{r}
+head(sleep_day)
+colnames(sleep_day)
+glimpse (sleep_day)
+```
+
+Take a look at the minute_METs data.
+```{r}
+head(minute_METs)
+colnames(minute_METs)
+glimpse(minute_METs)
+```
+
+Take a look at the heart_rate data.
+```{r}
+head(heart_rate)
+colnames(heart_rate)
+glimpse (heart_rate)
+```
+
+Take a look at the weightlog data.
+```{r}
+head(weightlog)
+colnames(weightlog)
+glimpse (weightlog)
+```
+# Analyse 
+
+Dataframes with the same 'Id' column will need to be merged. To do this we will need to check that the number of rows (participants) is equal as well as the number of unique values(observations). 
+
+We can use the n_distinct() and nrow() functions to summarise the dataframe and determine the number of unique values (participants) and rows respectively.
+
+```{r}
+n_distinct(daily_activity$Id)
+n_distinct(daily_activity)
+nrow(daily_activity)
+```
+
+```{r}
+n_distinct(sleep_day$Id)
+n_distinct(sleep_day)
+nrow(sleep_day)
+```
+
+
+
+```{r}
+view(sleep_day)
+```
+
+
+
+```{r}
+n_distinct(minute_METs$Id)
+n_distinct(minute_METs)
+nrow(minute_METs)
+```
+
+```{r}
+n_distinct(heart_rate$Id)
+n_distinct(heart_rate)
+nrow(heart_rate)
+```
+
+```{r}
+n_distinct(weightlog$Id)
+n_distinct(weightlog)
+nrow(weightlog)
+```
+
+The number of participants for weight log data is low relative to the other dataframes available. This will make it hard to provide reliable recommendations based on this dataframe. 
+
+Key statistics about the data including Mean, max min values and interquartile ranges can be made using the summary() function, selecting only the colums containing variable data.
+
+Daily activity
+```{r}
+daily_activity %>% 
+  select(TotalSteps, 
+         TotalDistance,
+         VeryActiveMinutes,
+         FairlyActiveMinutes, 
+         LightlyActiveMinutes,
+         SedentaryMinutes,
+         Calories) %>% 
+  summary()
+```
+
+NHS England recommends adults to do at least 150 minutes of moderate intensity activity a week (Brisk walk, riding a bike, Hiking, etc) or 75 minutes of vigorous intensity (Running,Swiimming, aerobics, sports) activity a week, approximately 21Mins/day and 10mins/day respectively. 
+The average number of fairly active minutes for this sample group is 21.16 minutes of vigourous/ very active minutes well above the average recommeded.
+Although this may be offset by the low average number of steps at 7638, 24% below the NHS recomended average of 10,000 steps and high average of sedentary minutes at 991.2 minutes (16.5hrs) a potential area for concern for long term health. 
+
+Scientists have determined that 40 minutes of moderate to vigorous activity a day will balance out the effects of sitting up to 10 hours a day. Furthermore, this summary shows the average user is burning 2304 calories a day. Studies show the average person in the population burns 1800 calories a day, but burning 3500 is needed to lose a pound of weight. The Fitbit users in this case are burning more than the norm, and are on track to lose a few pounds a week if they so choose.
+
+```{r}
+sleep_day %>% 
+  select(TotalMinutesAsleep,
+         TotalTimeInBed) %>% 
+  summary()
+```
+
+The average user sleeps approximately 7 hrs (419.5 mins), this falls within the  7hrs or more recommended by the CDC for adults. As the average time  in bed is 458.6 mins, users are staying awake for 39.1 mins. This can potentially be reduced by going to bed only when sleepy to prevent forming habits which may lead to insomnia according to Parkinsons UK.  
+
+
+```{r}
+minute_METs %>% 
+  select(ActivityMinute,
+         METs) %>% 
+  summary()
+```
+
+MET (Metabolic Equivalent of Task) is the  ratio of the rate at which a person expends energy, relative to the mass of that person, while performing some specific physical activity compared to a reference ie a person at rest would have an MET of 1.
+Jogging has an MET of 11 (11 times more energy exerted compared to sitting). The average for this group is 14.7 which is very intense. The max of 157 seems to be an anomolous result and requires further investigation into how this data point was collected
+
+"Metabolic Equivalents (METS) in Exercise Testing, Exercise Prescription, and Evaluation of Functional Capacity"link
+
+
+```{r}
+heart_rate %>% 
+  select(Value) %>% 
+  summary()
+```
+
+According to the MAyo clinic, a normal resting range os between 60 and 100 bpm however this is dependent on age and physicla health so will vary according to the individual. For example very fit cyclists can have a resting heart rate as low as the 40 bpm range.  
+
+```{r}
+weightlog %>% 
+  select(WeightKg,
+         Fat,
+         BMI) %>% 
+  summary()
+```
+
+BMI (Body Mass Index) is often used as a way to calculate wheter an indiviusal is overweight or not. This dataframe has a low participation rate but we can see that the average BMI of 25.19 which is overweight as well as a high average fat percentage of 23.5%. 
+A limitation of measuring BMI is that it can tell you if youre carrying too much weight but cannot tell if you're carrying too much fat. 
+ 
+# Share
+
+We can make this information easier to share with stakeholders by visualising in the ggplot package.  
+
+## Plot relationship between datapoints for each of the obtained metrics
+
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+```
+
+
+First we'll plot Sleep data - Minutes in Bed vs time asleep 
+
+```{r}
+ggplot(data=sleep_day, aes(x=TotalMinutesAsleep, y=TotalTimeInBed)) + geom_point()+
+  geom_smooth(method = "gam",formula = y~s(x)) +
+  ggtitle("Fig.1 Plot of Total Minutes Asleep vs Total Time In Bed") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+In Fig.1 we see positive correlation overall for time in bed vs total minutes asleep particularly for those asleep betwween 320 mins and 550 mins.
+
+
+```{r}
+ggplot(data=daily_activity, aes(x=TotalDistance, y=Calories)) + geom_point()+
+  geom_smooth(method = "gam", formula = y~s(x)) +
+  ggtitle("Fig.2 Plot of Total Distance vs Total Calories Burned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+When we plot total distance vs total calories burned we see that there ia a low positive correlation between the two. Many reasons for this including the nature of an activity for example a HIIT (High Intensity Interval Training) workout provides a high calorie burn in a short period of time within a confined space compared to an activity such as walking. More investigation is necessary to determine the nature of the activity. 
+
+
+
+```{r}
+ggplot(data=daily_activity, aes(x=TotalSteps, y=Calories)) + geom_point()+
+  geom_smooth(method = "gam", formula = y~s(x)) +
+  ggtitle("Fig.3 Plot of Total Steps vs Total Calories Burned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+```{r}
+ggplot(data=daily_activity, aes(x=VeryActiveMinutes, y=Calories)) + geom_point()+
+  geom_smooth(formula = y ~ x, method = lm) +
+  ggtitle("Fig.4 Plot of Active Minutes vs Total Calories Burned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Following the observation made in Fig.2 & Fig.3 there is more evidence in Fig.4 to support energy intense short duration activities by plotting Very active minutes against total calories burned.  
+
+#Act
+
+Recommendations for the bellabeat team include the following:
+
+Strategies for HIIT workouts 
+Getting better sleep 
+Increased activeness notifications 
+Social workouts for motivation 
+competition with other bellabeat users for most activw minutes 
+
+
+
+
+References 
+
+https://www.nhs.uk/live-well/exercise/#:~:text=do%20at%20least%20150%20minutes,a%20week%2C%20or%20every%20day
+
+https://www.parkinsons.org.uk/information-and-support/sleep-patterns-and-reducing-time-bed-awake#:~:text=Leave%20time%20to%20unwind,or%20your%20plans%20for%20tomorrow.
+
